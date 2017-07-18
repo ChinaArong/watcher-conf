@@ -6,7 +6,7 @@
 		<artifactId>watcher-conf</artifactId>
 		<version>1.3.0</version>
 	</parent>
-	<artifactId>watcher-admin</artifactId>
+	<artifactId>watcher-web</artifactId>
 	<packaging>war</packaging>
 
 	<dependencies>
