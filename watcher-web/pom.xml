@@ -137,4 +137,8 @@
 
 	</dependencies>
 
+	<build>
+		<finalName>watcher-web</finalName>
+	</build>
+
 </project>
