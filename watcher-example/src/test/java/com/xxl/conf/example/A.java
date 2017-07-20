@@ -143,4 +143,9 @@ public class A {
             }
         }
     }
+
+    @Test
+    public void test(){
+
+    }
 }

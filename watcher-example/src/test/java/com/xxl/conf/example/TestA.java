@@ -1,5 +1,6 @@
 package com.xxl.conf.example;
 
+import com.xxl.conf.core.XxlConfClient;
 import org.junit.Test;
 
 /**
@@ -9,6 +10,6 @@ public class TestA extends BaseTest{
 
     @Test
     public void a(){
-
+        String paramByClient = XxlConfClient.get("default.key02", null);
     }
 }

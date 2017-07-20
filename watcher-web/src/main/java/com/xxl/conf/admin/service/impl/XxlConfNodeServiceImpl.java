@@ -1,12 +1,12 @@
 package com.xxl.conf.admin.service.impl;
 
-import com.xxl.conf.admin.core.model.XxlConfGroup;
-import com.xxl.conf.admin.core.model.XxlConfNode;
 import com.xxl.conf.admin.core.util.ReturnT;
-import com.xxl.conf.admin.dao.IXxlConfGroupDao;
-import com.xxl.conf.admin.dao.IXxlConfNodeDao;
 import com.xxl.conf.admin.service.IXxlConfNodeService;
 import com.xxl.conf.core.XxlConfZkClient;
+import com.xxl.conf.core.dao.IXxlConfGroupMapper;
+import com.xxl.conf.core.dao.IXxlConfNodeMapper;
+import com.xxl.conf.core.model.XxlConfGroup;
+import com.xxl.conf.core.model.XxlConfNode;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,13 @@ import java.util.Map;
  * 配置
  * @author xuxueli
  */
-@Service()
+@Service
 public class XxlConfNodeServiceImpl implements IXxlConfNodeService {
 	
 	@Resource
-	private IXxlConfNodeDao xxlConfNodeDao;
+	private IXxlConfNodeMapper xxlConfNodeDao;
 	@Resource
-	private IXxlConfGroupDao xxlConfGroupDao;
+	private IXxlConfGroupMapper xxlConfGroupDao;
 
 	@Override
 	public Map<String,Object> pageList(int offset, int pagesize, String nodeGroup, String nodeKey) {

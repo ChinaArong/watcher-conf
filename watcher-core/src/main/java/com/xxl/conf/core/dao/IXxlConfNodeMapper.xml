@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="XxlConfNodeMapper">
+<mapper namespace="com.xxl.conf.core.dao.IXxlConfNodeMapper">
 	
-	<resultMap id="XxlConfNode" type="com.xxl.conf.admin.core.model.XxlConfNode" >
+	<resultMap id="XxlConfNode" type="com.xxl.conf.core.model.XxlConfNode" >
 		<result column="node_group" property="nodeGroup" jdbcType="VARCHAR" />
 		<result column="node_key" property="nodeKey" jdbcType="VARCHAR" />
 	    <result column="node_value" property="nodeValue" jdbcType="VARCHAR" />
@@ -19,7 +19,7 @@
 
 	<select id="pageList" parameterType="java.util.Map" resultMap="XxlConfNode">
 		SELECT <include refid="Base_Column_List" />
-		FROM XXL_CONF_NODE AS t
+		FROM distribution_conf_node AS t
 		<trim prefix="WHERE" prefixOverrides="AND | OR" >
 			<if test="nodeGroup != null and nodeGroup != '' ">
 				t.node_group = #{nodeGroup}
@@ -34,7 +34,7 @@
 
 	<select id="pageListCount" parameterType="java.util.Map" resultType="int">
 		SELECT count(1)
-		FROM XXL_CONF_NODE AS t
+		FROM distribution_conf_node AS t
 		<trim prefix="WHERE" prefixOverrides="AND | OR" >
 			<if test="nodeGroup != null and nodeGroup != '' ">
 			t.node_group = #{nodeGroup}
@@ -46,25 +46,25 @@
 	</select>
 
 	<delete id="deleteByKey" parameterType="java.util.Map" >
-		DELETE FROM XXL_CONF_NODE
+		DELETE FROM distribution_conf_node
 		WHERE node_group = #{nodeGroup}
 			AND node_key = #{nodeKey}
 	</delete>
 	
-	<insert id="insert" parameterType="com.xxl.conf.admin.core.model.XxlConfNode" >
-		INSERT INTO XXL_CONF_NODE(node_group, node_key, node_value, node_desc)
+	<insert id="insert" parameterType="com.xxl.conf.core.model.XxlConfNode" >
+		INSERT INTO distribution_conf_node(node_group, node_key, node_value, node_desc)
 		VALUES(#{nodeGroup}, #{nodeKey}, #{nodeValue}, #{nodeDesc})
 	</insert>
 	
 	<select id="selectByKey" parameterType="java.lang.String" resultMap="XxlConfNode">
 		SELECT <include refid="Base_Column_List" />
-		FROM XXL_CONF_NODE AS t
+		FROM distribution_conf_node AS t
 		WHERE t.node_group = #{nodeGroup}
 			AND t.node_key = #{nodeKey}
 	</select>
 	
-	<update id="update" parameterType="com.xxl.conf.admin.core.model.XxlConfNode" >
-		UPDATE XXL_CONF_NODE 
+	<update id="update" parameterType="com.xxl.conf.core.model.XxlConfNode" >
+		UPDATE distribution_conf_node
 		SET node_value = #{nodeValue}
 			, node_desc = #{nodeDesc}
 		WHERE node_group = #{nodeGroup}

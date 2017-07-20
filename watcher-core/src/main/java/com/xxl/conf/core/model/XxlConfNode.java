@@ -1,4 +1,4 @@
-package com.xxl.conf.admin.core.model;
+package com.xxl.conf.core.model;
 
 import com.xxl.conf.core.XxlConfZkClient;
 

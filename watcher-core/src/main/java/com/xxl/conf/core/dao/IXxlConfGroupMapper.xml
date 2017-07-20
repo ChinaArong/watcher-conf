@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="XxlConfGroupMapper">
+<mapper namespace="com.xxl.conf.core.dao.IXxlConfGroupMapper">
 	
-	<resultMap id="XxlConfGroup" type="com.xxl.conf.admin.core.model.XxlConfGroup" >
+	<resultMap id="XxlConfGroup" type="com.xxl.conf.core.model.XxlConfGroup" >
 		<result column="group_name" property="groupName" jdbcType="VARCHAR" />
 		<result column="group_title" property="groupTitle" jdbcType="VARCHAR" />
 	</resultMap>
@@ -15,29 +15,29 @@
 
 	<select id="findAll" parameterType="java.util.Map" resultMap="XxlConfGroup">
 		SELECT <include refid="Base_Column_List" />
-		FROM XXL_CONF_GROUP AS t
+		FROM distribution_conf_group AS t
 		ORDER BY t.group_name
 	</select>
 
-	<insert id="save" parameterType="com.xxl.conf.admin.core.model.XxlConfGroup" >
-		INSERT INTO XXL_CONF_GROUP(group_name, group_title)
+	<insert id="save" parameterType="com.xxl.conf.core.model.XxlConfGroup" >
+		INSERT INTO distribution_conf_group(group_name, group_title)
 		VALUES(#{groupName}, #{groupTitle})
 	</insert>
 
-	<update id="update" parameterType="com.xxl.conf.admin.core.model.XxlConfGroup" >
-		UPDATE XXL_CONF_GROUP
+	<update id="update" parameterType="com.xxl.conf.core.model.XxlConfGroup" >
+		UPDATE distribution_conf_group
 		SET group_title = #{groupTitle}
 		WHERE group_name = #{groupName}
 	</update>
 
 	<delete id="remove" parameterType="java.lang.String" >
-		DELETE FROM XXL_CONF_GROUP
+		DELETE FROM distribution_conf_group
 		WHERE group_name = #{groupName}
 	</delete>
 
 	<select id="load" parameterType="java.lang.String" resultMap="XxlConfGroup">
 		SELECT <include refid="Base_Column_List" />
-		FROM XXL_CONF_GROUP AS t
+		FROM distribution_conf_group AS t
 		WHERE group_name = #{groupName}
 	</select>
 	

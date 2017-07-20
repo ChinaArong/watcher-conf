@@ -53,7 +53,7 @@ public class XxlConfZkClient implements Watcher {
 			try {
 				if (INSTANCE_INIT_LOCK.tryLock(2, TimeUnit.SECONDS)) {
 					try {
-						zooKeeper = new ZooKeeper(Environment.ZK_ADDRESS, 20000, new Watcher() {
+						zooKeeper = new ZooKeeper(Environment.getZkAddress(), 20000, new Watcher() {
 							@Override
 							public void process(WatchedEvent watchedEvent) {
 								try {

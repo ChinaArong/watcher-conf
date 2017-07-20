@@ -1,8 +1,8 @@
 package com.xxl.conf.admin.service;
 
 
-import com.xxl.conf.admin.core.model.XxlConfNode;
 import com.xxl.conf.admin.core.util.ReturnT;
+import com.xxl.conf.core.model.XxlConfNode;
 
 import java.util.Map;
 

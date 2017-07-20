@@ -27,14 +27,8 @@ public class PropertiesUtil {
 		InputStream in = null;
 		try {
 			ClassLoader loder = Thread.currentThread().getContextClassLoader();
-			URL url = loder.getResource(propertyFileName); // 方式1：配置更新不需要重启JVM
-			if (url != null) {
-				in = new FileInputStream(url.getPath());
-				// in = loder.getResourceAsStream(propertyFileName); // 方式2：配置更新需重启JVM
-				if (in != null) {
-					prop.load(in);
-				}
-			}
+			in = loder.getResourceAsStream(propertyFileName);// 方式1：配置更新不需要重启JVM
+			prop.load(in);
 		} catch (IOException e) {
 			logger.error("load {} error!", propertyFileName);
 		} finally {
@@ -53,8 +47,7 @@ public class PropertiesUtil {
 		Properties prop = new Properties();
 		InputStream in = null;
 		try {
-			ClassLoader loder = Thread.currentThread().getContextClassLoader();
-			URL url = url = new File(propertyFileName).toURI().toURL();
+			URL url = new File(propertyFileName).toURI().toURL();
 			in = new FileInputStream(url.getPath());
 			if (in != null) {
 				prop.load(in);

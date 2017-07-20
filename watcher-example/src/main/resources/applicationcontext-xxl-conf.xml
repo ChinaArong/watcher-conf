@@ -6,7 +6,10 @@
 
 
 	<!-- XXL-CONF配置解析器 -->
-	<bean id="xxlConfPropertyPlaceholderConfigurer" class="com.xxl.conf.core.spring.XxlConfPropertyPlaceholderConfigurer" />
+	<bean id="xxlConfPropertyPlaceholderConfigurer" class="com.xxl.conf.core.spring.XxlConfPropertyPlaceholderConfigurer">
+		<property name="initializeProp" value="local.properties"/>
+		<property name="key" value="zkserver"/>
+	</bean>
 
 	<!-- XML占位符方式使用示例,可删除 -->
 	<bean id="configuration" class="com.xxl.conf.example.core.constant.Configuration">

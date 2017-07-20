@@ -1,10 +1,13 @@
 package com.xxl.conf.core.spring;
 
 import com.xxl.conf.core.XxlConfClient;
+import com.xxl.conf.core.util.Environment;
+import com.xxl.conf.core.util.PropertiesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionVisitor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -22,8 +25,28 @@ import java.util.Properties;
  * <bean id="xxlConfPropertyPlaceholderConfigurer" class="com.xxl.conf.core.spring.XxlConfPropertyPlaceholderConfigurer" />
  *
  */
-public class XxlConfPropertyPlaceholderConfigurer extends PropertyPlaceholderConfigurer {
+public class XxlConfPropertyPlaceholderConfigurer extends PropertyPlaceholderConfigurer implements InitializingBean {
 	private static Logger logger = LoggerFactory.getLogger(XxlConfPropertyPlaceholderConfigurer.class);
+
+
+	private String initializeProp;
+
+	private String key;
+
+	public void setInitializeProp(String initializeProp) {
+		this.initializeProp = initializeProp;
+	}
+
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Properties prop = PropertiesUtil.loadProperties(initializeProp);
+		Environment.setZkAddress(PropertiesUtil.getString(prop, key));
+	}
+
 
 	@Override
 	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props) throws BeansException {
