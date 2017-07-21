@@ -28,22 +28,6 @@
 	<jee:jndi-lookup id="dataSource" jndi-name="${datasource.jndiName}"
 					 proxy-interface="javax.sql.DataSource" lookup-on-startup="false"/>
 
-	<!--&lt;!&ndash; Main数据源  &ndash;&gt;-->
-	<!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">-->
-		<!--<property name="driverClassName"><value>${jdbc.driverClass}</value></property>-->
-		<!--<property name="url"><value>${jdbc.url}</value></property>-->
-		<!--<property name="username"><value>${jdbc.username}</value></property>-->
-		<!--<property name="password"><value>${jdbc.password}</value></property>-->
-		<!--<property name="maxActive"><value>10</value></property>-->
-		<!--<property name="maxWait"><value>10000</value></property>-->
-		<!--<property name="maxIdle"><value>1</value></property>-->
-		<!--<property name="initialSize"><value>1</value></property>-->
-		<!--<property name="removeAbandoned"><value>true</value></property>-->
-		<!--<property name="testWhileIdle"><value>true</value></property>-->
-		<!--<property name="testOnBorrow"><value>false</value></property>-->
-		<!--<property name="validationQuery"><value>SELECT 1</value></property>-->
-	<!--</bean>-->
-
 	<bean id="sqlSessionFactory4ScannerConfigurer" class="org.mybatis.spring.SqlSessionFactoryBean">
 		<property name="dataSource" ref="dataSource" />
 		<property name="mapperLocations" value="classpath*:com/xxl/conf/core/dao/*.xml" />
@@ -53,9 +37,6 @@
 		<property name="basePackage" value="com.xxl.conf.core.dao"/>
 		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory4ScannerConfigurer"/>
 	</bean>
-
-
-
 
 	<!-- 事务管理器（声明式事务） -->
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
@@ -85,5 +66,10 @@
 		<!-- 切入点事务通知 -->
 		<aop:advisor pointcut-ref="txoperation" advice-ref="txAdvice" />
 	</aop:config>
-	
+
+	<bean class="com.xxl.conf.core.util.ZkConfgEnvironment">
+		<property name="evn" value="${envName}"/>
+		<property name="zkConnectString" value="${zkService}"/>
+	</bean>
+
 </beans>

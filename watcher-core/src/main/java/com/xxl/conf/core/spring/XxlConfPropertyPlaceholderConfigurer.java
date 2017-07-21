@@ -1,21 +1,27 @@
 package com.xxl.conf.core.spring;
 
-import com.xxl.conf.core.XxlConfClient;
-import com.xxl.conf.core.util.Environment;
-import com.xxl.conf.core.util.PropertiesUtil;
+import com.google.common.collect.Sets;
+import com.google.gson.GsonBuilder;
+import com.xxl.conf.core.XxlConfZkClient;
+import com.xxl.conf.core.util.ZkConfgEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanDefinitionVisitor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.core.Ordered;
-import org.springframework.util.StringValueResolver;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
+import java.io.IOException;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * rewrite PropertyPlaceholderConfigurer
@@ -25,71 +31,84 @@ import java.util.Properties;
  * <bean id="xxlConfPropertyPlaceholderConfigurer" class="com.xxl.conf.core.spring.XxlConfPropertyPlaceholderConfigurer" />
  *
  */
-public class XxlConfPropertyPlaceholderConfigurer extends PropertyPlaceholderConfigurer implements InitializingBean {
+public class XxlConfPropertyPlaceholderConfigurer extends PropertyPlaceholderConfigurer {
 	private static Logger logger = LoggerFactory.getLogger(XxlConfPropertyPlaceholderConfigurer.class);
 
+	public static final String SYSTEM_PREFIX = "system.";
 
-	private String initializeProp;
+	private String fileEncoding;
 
-	private String key;
+	private String connectString;
 
-	public void setInitializeProp(String initializeProp) {
-		this.initializeProp = initializeProp;
+	private String evnName;
+
+	private String[] placeholderConfigLocations;
+
+	public void setEvnName(String evnName) {
+		this.evnName = evnName;
 	}
 
-	public void setKey(String key) {
-		this.key = key;
+	public void setConnectString(String connectString) {
+		this.connectString = connectString;
+	}
+
+	public void setPlaceholderConfigLocations(String[] placeholderConfigLocations) {
+		this.placeholderConfigLocations = placeholderConfigLocations;
+	}
+
+	public String[] getPlaceholderConfigLocations() {
+		return placeholderConfigLocations;
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		Properties prop = PropertiesUtil.loadProperties(initializeProp);
-		Environment.setZkAddress(PropertiesUtil.getString(prop, key));
-	}
-
-
-	@Override
-	protected void processProperties(ConfigurableListableBeanFactory beanFactoryToProcess, Properties props) throws BeansException {
-
-		// init value resolver
-		StringValueResolver valueResolver = new StringValueResolver() {
-			String placeholderPrefix = "${";
-			String placeholderSuffix = "}";
-			@Override
-			public String resolveStringValue(String strVal) {
-				StringBuffer buf = new StringBuffer(strVal);
-				// loop replace by xxl-conf, if the value match '${***}'
-				boolean start = strVal.startsWith(placeholderPrefix);
-				boolean end = strVal.endsWith(placeholderSuffix);
-				while (start && end) {
-					// replace by xxl-conf
-					String key = buf.substring(placeholderPrefix.length(), buf.length() - placeholderSuffix.length());
-					String zkValue = XxlConfClient.get(key, "");
-					buf = new StringBuffer(zkValue);
-					logger.info(">>>>>>>>>>> xxl-conf resolved placeholder '" + key + "' to value [" + zkValue + "]");
-					start = buf.toString().startsWith(placeholderPrefix);
-					end = buf.toString().endsWith(placeholderSuffix);
-				}
-				return buf.toString();
+	protected Properties mergeProperties() throws IOException {
+		final Properties properties = super.mergeProperties();
+		setSystemEnvProperties(properties);
+		for(String configLocation:getPlaceholderConfigLocations()){
+			String envConfigLocation = parseStringValue(configLocation, properties, Sets.newHashSet());
+			Resource resource = new ClassPathResource(envConfigLocation.substring(ResourceUtils.CLASSPATH_URL_PREFIX
+					.length()), ClassUtils.getDefaultClassLoader());
+			PropertiesLoaderUtils.fillProperties(properties, new EncodedResource(resource, this.fileEncoding).getResource());
+			//从zk上拉取所有的配置属性
+			if(connectString != null){
+				connectString = (String) properties.get(parsePlaceholder(connectString));
 			}
-		};
-
-		// init bean define visitor
-		BeanDefinitionVisitor visitor = new BeanDefinitionVisitor(valueResolver);
-
-		// visit bean definition
-		String[] beanNames = beanFactoryToProcess.getBeanDefinitionNames();
-		if (beanNames != null && beanNames.length > 0) {
-			for (String beanName : beanNames) {
-				if (!(beanName.equals(this.beanName) && beanFactoryToProcess.equals(this.beanFactory))) {
-					BeanDefinition bd = beanFactoryToProcess.getBeanDefinition(beanName);
-					visitor.visitBeanDefinition(bd);
-				}
+			if(evnName != null){
+				evnName = (String) properties.get(parsePlaceholder(evnName));
+			}
+			ZkConfgEnvironment.setConnectString(connectString);
+			ZkConfgEnvironment.setConfDataPath(evnName);
+			Map<String, String> allData = XxlConfZkClient.getAllData();
+			logger.info("<<<<<<<<<<<<<<<<<Get param from zk:{}", new GsonBuilder().create().toJson(allData));
+			for(Map.Entry<String, String> param : allData.entrySet()){
+				properties.setProperty(param.getKey(),param.getValue());
 			}
 		}
-		
-		// TODO Auto-generated method stub
-		//super.processProperties(beanFactoryToProcess, props);
+		return properties;
+	}
+
+	private void setSystemEnvProperties(Properties properties) {
+		Set<Object> keys = properties.keySet();
+		try {
+			for (Object obj : keys) {
+				if (obj instanceof String) {
+					String key = (String) obj;
+					if (key.startsWith(SYSTEM_PREFIX) || key.startsWith(SYSTEM_PREFIX.toUpperCase())) {
+						String subfix = null;
+						if (key.indexOf(SYSTEM_PREFIX) != -1) {
+							subfix = key.substring(key.indexOf(SYSTEM_PREFIX) + SYSTEM_PREFIX.length());
+						}
+						if (key.indexOf(SYSTEM_PREFIX.toUpperCase()) != -1) {
+							subfix = key.substring(key.indexOf(SYSTEM_PREFIX.toUpperCase()) + SYSTEM_PREFIX.length());
+						}
+						if (System.getProperty(subfix) == null) {
+							System.setProperty(subfix, properties.getProperty(key));
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+		}
 	}
 
 	@Override
@@ -112,6 +131,42 @@ public class XxlConfPropertyPlaceholderConfigurer extends PropertyPlaceholderCon
 	@Override
 	public void setIgnoreUnresolvablePlaceholders(boolean ignoreUnresolvablePlaceholders) {
 		super.setIgnoreUnresolvablePlaceholders(true);
+	}
+
+	@Override
+	public void setFileEncoding(String encoding) {
+		this.fileEncoding = encoding;
+		super.setFileEncoding(encoding);
+	}
+
+	private String parsePlaceholder(String strVal){
+		StringBuilder result = new StringBuilder(strVal);
+		int startIndex = strVal.indexOf(this.placeholderPrefix);
+		if (startIndex != -1) {
+			int endIndex = findPlaceholderEndIndex(result, startIndex);
+			if (endIndex != -1) {
+				return result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
+			}
+		}
+		return null;
+	}
+
+	private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
+		int index = startIndex + this.placeholderPrefix.length();
+		int withinNestedPlaceholder = 0;
+		while (index < buf.length()) {
+			if (StringUtils.substringMatch(buf, index, this.placeholderSuffix)) {
+				if (withinNestedPlaceholder > 0) {
+					withinNestedPlaceholder--;
+					index = index + this.placeholderSuffix.length();
+				}
+				else {
+					return index;
+				}
+			}
+			index ++;
+		}
+		return -1;
 	}
 
 }

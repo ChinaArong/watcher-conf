@@ -1,14 +1,11 @@
 package com.xxl.conf.core;
 
-import com.xxl.conf.core.util.Environment;
-import com.xxl.conf.core.util.PropertiesUtil;
+import com.xxl.conf.core.util.ZkConfgEnvironment;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Properties;
 
 /**
  * local cache
@@ -16,11 +13,10 @@ import java.util.Properties;
  */
 public class XxlConfClient {
 	private static Logger logger = LoggerFactory.getLogger(XxlConfClient.class);
-	public static Properties localProp = PropertiesUtil.loadProperties("local.properties");
 	private static Cache cache;
 	static {
 		CacheManager manager = CacheManager.create();	// default use ehcche.xml under src
-		cache = new Cache(Environment.CONF_DATA_PATH, 10000, false, true, 1800, 1800);
+		cache = new Cache(ZkConfgEnvironment.getConfDataPath(), 10000, false, true, 1800, 1800);
 		manager.addCache(cache);
 	}
 
@@ -41,9 +37,6 @@ public class XxlConfClient {
 	}
 
 	public static String get(String key, String defaultVal) {
-		if (localProp!=null && localProp.containsKey(key)) {
-			return localProp.getProperty(key);
-		}
 		if (cache != null) {
 			Element element = cache.get(key);
 			if (element != null) {

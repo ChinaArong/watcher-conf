@@ -7,10 +7,24 @@
 
 	<!-- XXL-CONF配置解析器 -->
 	<bean id="xxlConfPropertyPlaceholderConfigurer" class="com.xxl.conf.core.spring.XxlConfPropertyPlaceholderConfigurer">
-		<property name="initializeProp" value="local.properties"/>
-		<property name="key" value="zkserver"/>
+		<property name="locations">
+			<list>
+				<value>classpath:conf/resource/config.properties</value>
+			</list>
+		</property>
+		<property name="placeholderConfigLocations">
+			<list>
+				<value>classpath:conf/resource/${envName}.properties</value>
+			</list>
+		</property>
+		<property name="evnName" value="${envName}"/>
+		<property name="connectString" value="${zkServer}"/>
 	</bean>
 
+	<bean class="com.xxl.conf.example.core.constant.B">
+		<property name="a" value="${default.key01}"/>
+		<property name="b" value="${default.key02}"/>
+	</bean>
 	<!-- XML占位符方式使用示例,可删除 -->
 	<bean id="configuration" class="com.xxl.conf.example.core.constant.Configuration">
 		<property name="paramByXml" value="${default.key01}" />

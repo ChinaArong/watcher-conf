@@ -1,13 +1,13 @@
 package com.xxl.conf.example;
 
-import com.xxl.conf.core.XxlConfClient;
-import com.xxl.conf.core.XxlConfZkClient;
-import com.xxl.conf.core.util.Environment;
+import com.xxl.conf.core.util.ZkConfgEnvironment;
+import com.xxl.conf.core.util.PropertiesUtil;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,7 +23,7 @@ public class A {
     @Test
     public void testa() throws InterruptedException {
         try {
-            zooKeeper = new ZooKeeper(Environment.ZK_ADDRESS, 20000,new ZKWatcher());
+            zooKeeper = new ZooKeeper(ZkConfgEnvironment.getConnectString(), 20000,new ZKWatcher());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -33,18 +33,18 @@ public class A {
     @Test
     public void testb() throws InterruptedException {
         try {
-            zooKeeper = new ZooKeeper(Environment.ZK_ADDRESS, 20000,new ZKWatcher());
+            zooKeeper = new ZooKeeper(ZkConfgEnvironment.getConnectString(), 20000,new ZKWatcher());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        createRoot(Environment.CONF_DATA_PATH);
+        createRoot(ZkConfgEnvironment.getConfDataPath());
         TimeUnit.HOURS.sleep(1);
     }
 
     @Test
     public void testc() throws InterruptedException {
         try {
-            zooKeeper = new ZooKeeper(Environment.ZK_ADDRESS, 20000,new ZKWatcher());
+            zooKeeper = new ZooKeeper(ZkConfgEnvironment.getConfDataPath(), 20000,new ZKWatcher());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -53,7 +53,7 @@ public class A {
 
     @Test
     public void testd() throws IOException, InterruptedException {
-        zooKeeper = new ZooKeeper(Environment.ZK_ADDRESS, 20000,new ZKWatcher());
+        zooKeeper = new ZooKeeper(ZkConfgEnvironment.getConfDataPath(), 20000,new ZKWatcher());
         System.out.println("++++++++++++++++++++++++++");
         String data = getData("zk.client");
         System.out.println(data);
@@ -61,7 +61,7 @@ public class A {
     }
 
     private String getData(String key){
-        String path = Environment.CONF_DATA_PATH + "/" + key;
+        String path = ZkConfgEnvironment.getConnectString() + "/" + key;
         try {
             Stat stat = zooKeeper.exists(path, true);
             if(stat != null){
@@ -77,7 +77,7 @@ public class A {
     }
 
     private void setData(String key,String data) throws InterruptedException {
-        String path = Environment.CONF_DATA_PATH + "/" + key;
+        String path = ZkConfgEnvironment.getConfDataPath() + "/" + key;
         try {
             Stat stat = zooKeeper.exists(path, true);
             if(stat == null){
@@ -146,6 +146,9 @@ public class A {
 
     @Test
     public void test(){
+
+        String na = "/watcher-conf".substring(0,1)+"dev"+"."+"/watcher-conf".substring(1);
+        System.out.println(na);
 
     }
 }
